@@ -15,7 +15,8 @@
             app:key="currencyChoice"
             app:title="Currency"
             app:entries="@array/currency_entries"
-            app:entryValues="@array/currency_values"/>
+            app:entryValues="@array/currency_values"
+            app:useSimpleSummaryProvider="true" />
 
         <EditTextPreference
             app:key="windowSize"
