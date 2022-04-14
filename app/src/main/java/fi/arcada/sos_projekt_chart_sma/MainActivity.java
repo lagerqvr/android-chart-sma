@@ -22,6 +22,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     TextView statsText;
+    ArrayList<Double> sma10, sma30;
     LineChart chart;
     Button button1, button2;
     int smaWin;
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-            currencyChoice = sharedPref.getString("currencyChoice", "EUR");
+            currencyChoice = sharedPref.getString("currencyChoice", "SEK");
             fromDate = sharedPref.getString("fromDate", "2022-01-01");
             toDate = sharedPref.getString("toDate", "2022-02-01");
             smaWin = Integer.parseInt(sharedPref.getString("windowSize", "3"));
@@ -58,6 +59,11 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<Double> currencyValues = getCurrencyValues(currency, datefrom, dateto);
             // Skriv ut dem i konsolen
             System.out.println(currencyValues.toString());
+            System.out.println(Statistics.movingAverage(currencyValues, smaWin));
+
+            sma10 = Statistics.movingAverage(currencyValues, smaWin);
+            sma30 = Statistics.movingAverage(currencyValues, 30);
+
 
             createSimpleGraph(currencyValues);
 
@@ -70,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
-
 
     // Färdig metod som hämtar växelkursdata
     public ArrayList<Double> getCurrencyValues(String currency, String from, String to) {
@@ -99,16 +104,43 @@ public class MainActivity extends AppCompatActivity {
 
     public void createSimpleGraph(ArrayList<Double> dataSet) {
         List<Entry> entries = new ArrayList<Entry>();
+        ArrayList<Entry> SMA10 = new ArrayList<Entry>();
+        ArrayList<Entry> SMA30 = new ArrayList<Entry>();
 
         for (int i = 0; i < dataSet.size(); i++) {
             entries.add(new Entry(i, dataSet.get(i).floatValue()));
         }
+        for (int i = 0; i < sma10.size(); i++) {
+            SMA10.add(new Entry(i, sma10.get(i).floatValue()));
+        }
+        for (int i = 0; i < sma30.size(); i++) {
+            SMA30.add(new Entry(i, sma30.get(i).floatValue()));
+        }
 
-        LineDataSet lineDataSet = new LineDataSet(entries, "Temperatur");
-        LineData lineData = new LineData(lineDataSet);
+        // Chart data
+
+        LineData lineData = new LineData();
+
+        // Line 1
+        LineDataSet lineDataSet = new LineDataSet(entries, currencyChoice);
+        lineDataSet.setColor(getResources().getColor(R.color.blue));
+        lineDataSet.setCircleColor(getResources().getColor(R.color.blue));
+        lineData.addDataSet(lineDataSet);
+
+        // Line 2
+        LineDataSet lineDataSet10 = new LineDataSet(SMA10, "SMA10");
+        lineDataSet10.setColor(getResources().getColor(R.color.red));
+        lineDataSet10.setCircleColor(getResources().getColor(R.color.red));
+        lineData.addDataSet(lineDataSet10);
+
+        // Line 3
+        /* LineDataSet lineDataSet30 = new LineDataSet(SMA10, "SMA30");
+        lineDataSet30.setColor(getResources().getColor(R.color.green));
+        lineDataSet30.setCircleColor(getResources().getColor(R.color.green));
+        lineData.addDataSet(lineDataSet30); */
 
         chart.setData(lineData);
-        chart.invalidate(); // refresh
+        chart.invalidate(); // Refresh
 
     }
 }
