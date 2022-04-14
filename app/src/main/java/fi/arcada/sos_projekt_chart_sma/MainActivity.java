@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -13,20 +12,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView titleText, statsText;
+    TextView statsText;
+    LineChart chart;
     Button button1, button2;
-    String currency, datefrom, dateto, currencyChoice, fromDate, toDate,smaWin;
+    int smaWin;
+    String currency, datefrom, dateto, currencyChoice, fromDate, toDate;
     SharedPreferences sharedPref;
     SharedPreferences.Editor prefEditor;
 
@@ -36,30 +35,32 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         try {
-
             sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             currencyChoice = sharedPref.getString("currencyChoice", "EUR");
             fromDate = sharedPref.getString("fromDate", "2022-01-01");
             toDate = sharedPref.getString("toDate", "2022-02-01");
-            smaWin = sharedPref.getString("windowSize", "3");
+            smaWin = Integer.parseInt(sharedPref.getString("windowSize", "3"));
+
+            chart = (LineChart) findViewById(R.id.chart);
 
             // TEMPORÄRA VÄRDEN
             currency = currencyChoice;
             datefrom = fromDate;
             dateto = toDate;
 
-            titleText = findViewById(R.id.titleText);
             statsText = findViewById(R.id.statsText);
             button1 = findViewById(R.id.button1);
             button2 = findViewById(R.id.button2);
 
-            titleText.setText("Exchange rate - " + currencyChoice);
             statsText.setText(currency + " | " + fromDate + " - " + toDate);
 
             // Hämta växelkurser från API
             ArrayList<Double> currencyValues = getCurrencyValues(currency, datefrom, dateto);
             // Skriv ut dem i konsolen
             System.out.println(currencyValues.toString());
+
+            createSimpleGraph(currencyValues);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,5 +95,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return currencyData;
+    }
+
+    public void createSimpleGraph(ArrayList<Double> dataSet) {
+        List<Entry> entries = new ArrayList<Entry>();
+
+        for (int i = 0; i < dataSet.size(); i++) {
+            entries.add(new Entry(i, dataSet.get(i).floatValue()));
+        }
+
+        LineDataSet lineDataSet = new LineDataSet(entries, "Temperatur");
+        LineData lineData = new LineData(lineDataSet);
+
+        chart.setData(lineData);
+        chart.invalidate(); // refresh
+
     }
 }
