@@ -26,6 +26,7 @@
         android:layout_height="52dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="12dp"
+        android:onClick="s10Click"
         android:text="SMA10"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -36,6 +37,7 @@
         android:layout_height="52dp"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="12dp"
+        android:onClick="s30Click"
         android:text="SMA30"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/button1" />

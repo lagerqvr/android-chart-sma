@@ -22,10 +22,12 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     TextView statsText;
-    ArrayList<Double> sma10, sma30;
+    ArrayList<Double> sma10, sma30, sma;
     LineChart chart;
     Button button1, button2;
     int smaWin;
+    boolean s10 = true;
+    boolean s30 = true;
     String currency, datefrom, dateto, currencyChoice, fromDate, toDate;
     SharedPreferences sharedPref;
     SharedPreferences.Editor prefEditor;
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             currencyChoice = sharedPref.getString("currencyChoice", "SEK");
             fromDate = sharedPref.getString("fromDate", "2022-01-01");
-            toDate = sharedPref.getString("toDate", "2022-02-01");
+            toDate = sharedPref.getString("toDate", "2022-04-01");
             smaWin = Integer.parseInt(sharedPref.getString("windowSize", "3"));
 
             chart = (LineChart) findViewById(R.id.chart);
@@ -59,11 +61,12 @@ public class MainActivity extends AppCompatActivity {
             ArrayList<Double> currencyValues = getCurrencyValues(currency, datefrom, dateto);
             // Skriv ut dem i konsolen
             System.out.println(currencyValues.toString());
-            System.out.println(Statistics.movingAverage(currencyValues, smaWin));
+            System.out.println(Statistics.movingAverage(currencyValues, 10));
+            System.out.println(Statistics.movingAverage(currencyValues, 30));
 
-            sma10 = Statistics.movingAverage(currencyValues, smaWin);
+            sma = Statistics.movingAverage(currencyValues, smaWin);
+            sma10 = Statistics.movingAverage(currencyValues, 10);
             sma30 = Statistics.movingAverage(currencyValues, 30);
-
 
             createSimpleGraph(currencyValues);
 
@@ -93,10 +96,10 @@ public class MainActivity extends AppCompatActivity {
 
             if (jsonData != null) {
                 currencyData = api.getCurrencyData(jsonData, currency.trim());
-                Toast.makeText(getApplicationContext(), String.format("Hämtade %s valutakursvärden från servern", currencyData.size()), Toast.LENGTH_LONG).show();
+                // Toast.makeText(getApplicationContext(), String.format("Fetched %s values from the server", currencyData.size()), Toast.LENGTH_LONG).show();
             }
         } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "Kunde inte hämta växelkursdata från servern: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Couldn't fetch values from server: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
         return currencyData;
@@ -118,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Chart data
-
         LineData lineData = new LineData();
 
         // Line 1
@@ -129,18 +131,48 @@ public class MainActivity extends AppCompatActivity {
 
         // Line 2
         LineDataSet lineDataSet10 = new LineDataSet(SMA10, "SMA10");
-        lineDataSet10.setColor(getResources().getColor(R.color.red));
-        lineDataSet10.setCircleColor(getResources().getColor(R.color.red));
-        lineData.addDataSet(lineDataSet10);
+        if (s10) {
+            lineDataSet10.setColor(getResources().getColor(R.color.red));
+            lineDataSet10.setCircleColor(getResources().getColor(R.color.red));
+            lineData.addDataSet(lineDataSet10);
+        } else {
+            lineDataSet10.setVisible(false);
+        }
 
         // Line 3
-        /* LineDataSet lineDataSet30 = new LineDataSet(SMA10, "SMA30");
-        lineDataSet30.setColor(getResources().getColor(R.color.green));
-        lineDataSet30.setCircleColor(getResources().getColor(R.color.green));
-        lineData.addDataSet(lineDataSet30); */
+        LineDataSet lineDataSet30 = new LineDataSet(SMA30, "SMA30");
+        if (s30) {
+            lineDataSet30.setColor(getResources().getColor(R.color.green));
+            lineDataSet30.setCircleColor(getResources().getColor(R.color.green));
+            lineData.addDataSet(lineDataSet30);
+        } else {
+            lineDataSet30.setVisible(false);
+        }
 
+        // Set data
         chart.setData(lineData);
         chart.invalidate(); // Refresh
+    }
 
+    public void s10Click(View view) {
+        ArrayList<Double> currencyValues = getCurrencyValues(currency, datefrom, dateto);
+        if (s10) {
+            s10 = false;
+        } else {
+            s10 = true;
+        }
+        createSimpleGraph(currencyValues);
+        chart.invalidate(); // redraw
+    }
+
+    public void s30Click(View view) {
+        ArrayList<Double> currencyValues = getCurrencyValues(currency, datefrom, dateto);
+        if (s30) {
+            s30 = false;
+        } else {
+            s30 = true;
+        }
+        createSimpleGraph(currencyValues);
+        chart.invalidate(); // redraw
     }
 }
