@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
         LineDataSet lineDataSet = new LineDataSet(entries, currencyChoice);
         lineDataSet.setColor(getResources().getColor(R.color.blue));
         lineDataSet.setCircleColor(getResources().getColor(R.color.blue));
+        lineDataSet.setDrawCircles(false);
         lineData.addDataSet(lineDataSet);
 
         // Line 2
@@ -134,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
         if (s10) {
             lineDataSet10.setColor(getResources().getColor(R.color.red));
             lineDataSet10.setCircleColor(getResources().getColor(R.color.red));
+            lineDataSet10.setDrawCircles(false);
             lineData.addDataSet(lineDataSet10);
         } else {
             lineDataSet10.setVisible(false);
@@ -144,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
         if (s30) {
             lineDataSet30.setColor(getResources().getColor(R.color.green));
             lineDataSet30.setCircleColor(getResources().getColor(R.color.green));
+            lineDataSet30.setDrawCircles(false);
             lineData.addDataSet(lineDataSet30);
         } else {
             lineDataSet30.setVisible(false);
