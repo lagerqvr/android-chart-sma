@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -15,6 +16,7 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             button1 = findViewById(R.id.button1);
             button2 = findViewById(R.id.button2);
 
-            statsText.setText(currency + " | " + fromDate + " - " + toDate);
+            statsText.setText(currency + " - EUR | " + fromDate + " - " + toDate);
 
             // Hämta växelkurser från API
             ArrayList<Double> currencyValues = getCurrencyValues(currency, datefrom, dateto);
@@ -68,7 +70,8 @@ public class MainActivity extends AppCompatActivity {
             sma10 = Statistics.movingAverage(currencyValues, 10);
             sma30 = Statistics.movingAverage(currencyValues, 30);
 
-            createSimpleGraph(currencyValues);
+             // createMultilineGraph(dataSets);
+             createSimpleGraph(currencyValues);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -110,14 +113,18 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<Entry> SMA10 = new ArrayList<Entry>();
         ArrayList<Entry> SMA30 = new ArrayList<Entry>();
 
+        int entryOffset = 0;
+
         for (int i = 0; i < dataSet.size(); i++) {
             entries.add(new Entry(i, dataSet.get(i).floatValue()));
         }
         for (int i = 0; i < sma10.size(); i++) {
-            SMA10.add(new Entry(i, sma10.get(i).floatValue()));
+            entryOffset = dataSet.size() - sma10.size();
+            SMA10.add(new Entry(i + entryOffset, sma10.get(i).floatValue()));
         }
         for (int i = 0; i < sma30.size(); i++) {
-            SMA30.add(new Entry(i, sma30.get(i).floatValue()));
+            entryOffset = dataSet.size() - sma30.size();
+            SMA30.add(new Entry(i + entryOffset, sma30.get(i).floatValue()));
         }
 
         // Chart data
@@ -126,15 +133,14 @@ public class MainActivity extends AppCompatActivity {
         // Line 1
         LineDataSet lineDataSet = new LineDataSet(entries, currencyChoice);
         lineDataSet.setColor(getResources().getColor(R.color.blue));
-        lineDataSet.setCircleColor(getResources().getColor(R.color.blue));
         lineDataSet.setDrawCircles(false);
+        lineDataSet.setDrawValues(false);
         lineData.addDataSet(lineDataSet);
 
         // Line 2
         LineDataSet lineDataSet10 = new LineDataSet(SMA10, "SMA10");
         if (s10) {
             lineDataSet10.setColor(getResources().getColor(R.color.red));
-            lineDataSet10.setCircleColor(getResources().getColor(R.color.red));
             lineDataSet10.setDrawCircles(false);
             lineData.addDataSet(lineDataSet10);
         } else {
@@ -145,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
         LineDataSet lineDataSet30 = new LineDataSet(SMA30, "SMA30");
         if (s30) {
             lineDataSet30.setColor(getResources().getColor(R.color.green));
-            lineDataSet30.setCircleColor(getResources().getColor(R.color.green));
             lineDataSet30.setDrawCircles(false);
             lineData.addDataSet(lineDataSet30);
         } else {
@@ -165,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
             s10 = true;
         }
         createSimpleGraph(currencyValues);
-        chart.invalidate(); // redraw
+        chart.invalidate(); // Redraw
     }
 
     public void s30Click(View view) {
@@ -176,6 +181,6 @@ public class MainActivity extends AppCompatActivity {
             s30 = true;
         }
         createSimpleGraph(currencyValues);
-        chart.invalidate(); // redraw
+        chart.invalidate(); // Redraw
     }
 }
